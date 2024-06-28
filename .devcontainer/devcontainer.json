@@ -19,8 +19,8 @@
       "keybindings": [
         {
           "key": "ctrl+enter",
-          "command": "python.execSelectionInTerminal",
-          "when": "editorTextFocus && editorLangId == 'python'"
+          "command": "python.execInTerminal",
+          "when": "editorLangId == 'python'"
         }
       ]
     }
