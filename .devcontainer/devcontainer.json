@@ -5,7 +5,8 @@
   "settings": {
     "editor.tabSize": 4,
     "python.formatting.provider": "black",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "workbench.colorTheme": "Default Dark Modern"
   },
   "extensions": [
     "vscodevim.vim",
