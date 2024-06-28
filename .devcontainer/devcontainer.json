@@ -6,11 +6,23 @@
     "editor.tabSize": 4,
     "python.formatting.provider": "black",
     "editor.formatOnSave": true,
-    "workbench.colorTheme": "Default Dark Modern"
+    "workbench.colorTheme": "Monokai"
   },
   "extensions": [
     "vscodevim.vim",
     "ms-python.python",
+    "ms-python.black-formatter",
     "ms-toolsai.jupyter"
-  ]
+  ],
+  "customizations": {
+    "vscode": {
+      "keybindings": [
+        {
+          "key": "ctrl+enter",
+          "command": "python.execSelectionInTerminal",
+          "when": "editorTextFocus && editorLangId == 'python'"
+        }
+      ]
+    }
+  }
 }
