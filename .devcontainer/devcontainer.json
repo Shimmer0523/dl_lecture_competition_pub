@@ -19,8 +19,7 @@
       "keybindings": [
         {
           "key": "ctrl+enter",
-          "command": "python.execInTerminal-icon",
-          "when": "editorLangId == 'python'"
+          "command": "python.execInTerminal-icon"
         }
       ]
     }
