@@ -8,8 +8,8 @@
     "editor.formatOnSave": true
   },
   "extensions": [
+    "vscodevim.vim",
     "ms-python.python",
-    "vim",
     "ms-toolsai.jupyter"
   ]
 }
