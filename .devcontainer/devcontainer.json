@@ -1,0 +1,15 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+  },
+  "settings": {
+    "editor.tabSize": 4,
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": true
+  },
+  "extensions": [
+    "ms-python.python",
+    "vim",
+    "ms-toolsai.jupyter"
+  ]
+}
