@@ -5,9 +5,7 @@
   "customizations": {
     "vscode": {
       "settings": {
-        "editor.tabSize": 4,
         "python.formatting.provider": "black",
-        "editor.formatOnSave": true,
         "workbench.colorTheme": "Monokai"
       },
       "extensions": [
