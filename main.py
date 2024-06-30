@@ -20,8 +20,6 @@ def run(args: DictConfig):
     set_seed(args.seed)
     logdir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
 
-    ic(logdir)
-
     if args.use_wandb:
         wandb.init(mode="online", dir=logdir, project="MEG-classification")
 
@@ -31,7 +29,6 @@ def run(args: DictConfig):
     loader_args = {"batch_size": args.batch_size, "num_workers": args.num_workers}
 
     train_set = ThingsMEGDataset("train", args.data_dir)
-    print(len(train_set))
     train_loader = torch.utils.data.DataLoader(train_set, shuffle=True, **loader_args)
     val_set = ThingsMEGDataset("val", args.data_dir)
     val_loader = torch.utils.data.DataLoader(val_set, shuffle=False, **loader_args)
@@ -71,10 +68,10 @@ def run(args: DictConfig):
         model.train()
         for X, y, subject_idxs in tqdm(train_loader, desc="Train"):
             X, y = X.to(args.device), y.to(args.device)
-
             y_pred = model(X)
 
             loss = F.cross_entropy(y_pred, y)
+
             train_loss.append(loss.item())
 
             optimizer.zero_grad()
