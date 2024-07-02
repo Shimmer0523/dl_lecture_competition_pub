@@ -46,12 +46,12 @@ class ResNet18(nn.Module):
     def __init__(
         self,
         in_channels: int,
-        emb_dim: int,
+        cls_num: int,
     ):
         """
         Args:
         in_channels[int]: 入力のチャネル数
-        emb_dim[int]: 特徴ベクトルの次元数
+        cls_num[int]: 特徴ベクトルの次元数
         """
         super().__init__()
         self.in_channels = in_channels
@@ -78,7 +78,7 @@ class ResNet18(nn.Module):
             stride=2,
         )
         self.adaptive_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512, emb_dim)
+        self.fc = nn.Linear(512, cls_num)
 
         # 重みの初期化
         for m in self.modules():
