@@ -5,32 +5,27 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import torch.utils
+import torch.utils.data
 from torchmetrics import Accuracy
 from torchvision import transforms
 from PIL import Image
 
-from src.datasets import ThingsMEGDataset
-from src.models import ResNet18, BasicConvClassifier
+from src.datasets import Image2CategoryDataset
+from src.models import ResNet18
 from src.utils import set_seed
 
 
-def load_preprocess_image(path: str):
-    transform = transforms.Compose(
-        [
-            transforms.Resize((244, 244)),
-            transform.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
-
-    image = Image.open(fp=path).convert(mode="RGB")
-    image = transform(image).unsqueeze(0)
-    return image
-
-def provide_dataloader():
-    train_dataset = 
-
 def run():
+    set_seed(123)
+
+    train_dataset = Image2CategoryDataset("train", data_dir=data_dir)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=64, shuffle=True
+    )
+    val_dataset = Image2CategoryDataset("val", data_dir=data_dir)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=64, shuffle=True)
+
     model = ResNet18(in_channels=3, cls_num=1854)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -41,6 +36,9 @@ def run():
     epochs = 10
     for epoch in range(epochs):
         model.train()
+
+        for img, y in train_loader:
+            pass
 
 
 if __name__ == "__main__":

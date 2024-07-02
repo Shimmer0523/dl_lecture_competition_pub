@@ -43,6 +43,8 @@ class ResidualBlock(nn.Module):
 
 
 class ResNet18(nn.Module):
+    """ResNet18"""
+
     def __init__(
         self,
         in_channels: int,

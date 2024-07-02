@@ -2,6 +2,7 @@ import os
 import numpy as np
 import torch
 from torchvision import transforms
+from PIL import Image
 from typing import Tuple
 from termcolor import cprint
 import torch.utils
@@ -9,27 +10,36 @@ import torch.utils.data
 
 
 class Image2CategoryDataset(torch.utils.data.Dataset):
-    def __init__(self, split: str, data_dir: str):
+    """画像と画像に対応するカテゴリラベルのデータセット"""
+
+    def __init__(self, split: str, data_dir: str, transform: transforms.Compose = None):
         super().__init__()
 
-        self.X = torch.load(os.path.join(data_dir, f"{split}_y.pt"))
+        # トランスフォーム
+        self.transform = transform
 
+        # 画像ファイルのパスをリスト化
         with open(os.path.join(data_dir, f"{split}_image_paths.txt"), "r") as file:
             lines = file.readlines()
+        self.image_paths = [line.strip() for line in lines]
 
-        self.y = [line.strip() for line in lines]
-        transforms.Compose([
-            transforms.ToTensor
-        ])
+        # 画像のカテゴリラベル
+        self.y = torch.load(os.path.join(data_dir, f"{split}_y.pt"))
 
     def __len__(self) -> int:
-        return len(self.X)
+        return len(self.y)
 
     def __getitem__(self, index):
-        return self.X[index], self.y[index]
+        img = Image.open(self.image_paths[index]).convert("RGB")
+        if self.transform:
+            img = self.transform(img)
+
+        return img, self.y[index]
 
 
 class ThingsMEGDataset(torch.utils.data.Dataset):
+    """脳波MEGデータと脳波に対応する画像のカテゴリラベルのデータセット"""
+
     def __init__(self, split: str, data_dir: str = "data") -> None:
         super().__init__()
 
