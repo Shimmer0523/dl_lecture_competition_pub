@@ -36,7 +36,6 @@ def run(args: DictConfig):
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=64, shuffle=True
     )
-    ic(len(train_loader))
     val_dataset = Image2CategoryDataset(
         "val", data_dir=args.data_dir, transform=transform
     )
@@ -54,13 +53,11 @@ def run(args: DictConfig):
         model.train()
         for i, (img, y) in enumerate(train_loader):
             img = img.to(device)
-            ic(y)
             y = y.to(device)
 
             # 順伝搬
             pred = model(img)
             loss = criterion(pred, y)
-            ic(loss)
 
             # 逆伝搬
             optimizer.zero_grad()
