@@ -114,7 +114,7 @@ class ResNet18(nn.Module):
         )
         self.in_channels = out_channels
         for _ in range(1, block_num):
-            layers.append(ResidualBlock(out_channels, out_channels))
+            layers.append(ResidualBlock(out_channels, out_channels, 1, None))
 
         return nn.Sequential(*layers)
 
