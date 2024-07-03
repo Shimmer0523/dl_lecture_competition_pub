@@ -48,7 +48,7 @@ def run(args: DictConfig):
         model.train()
         for i, (img, y) in enumerate(train_loader):
             img = img.to(device)
-            y = y.to(device)
+            y = F.one_hot(y, num_classes=1854).float().to(device)
 
             # 順伝搬
             pred = model(img)
@@ -63,13 +63,20 @@ def run(args: DictConfig):
                 print(f"Epoch: {i / epochs}, Loss: {loss.average(dim=0).item()}")
 
         model.eval()
-        for img, y in val_loader:
-            img = img.to(device)
-            y = y.to(device)
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for img, y in val_loader:
+                img = img.to(device)
+                y = y.to(device)
 
-            pred = model(img)
+                pred = model(img)
 
-            cls = torch.argmax(pred, dim=1)
+                cls = torch.argmax(pred, dim=1)
+                correct += (cls == y).sum().item()
+                total += y.size(0)
+        accuracy = correct / total
+        print(f"Epoch: {epoch}, Accuracy: {accuracy:.4f}")
 
 
 if __name__ == "__main__":
