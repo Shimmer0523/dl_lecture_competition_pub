@@ -54,6 +54,7 @@ def run(args: DictConfig):
         model.train()
         for i, (img, y) in enumerate(train_loader):
             img = img.to(device)
+            ic(y)
             y = y.to(device)
 
             # 順伝搬
