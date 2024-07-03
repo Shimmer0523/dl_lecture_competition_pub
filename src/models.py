@@ -119,11 +119,8 @@ class ResNet18(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        ic(x.shape)
         x = F.relu(self.batch_norm1(self.conv1(x)))
-        ic(x.shape)
         x = self.max_pool(x)
-        ic(x.shape)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)

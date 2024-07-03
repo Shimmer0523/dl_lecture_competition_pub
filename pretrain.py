@@ -65,7 +65,7 @@ def run(args: DictConfig):
             optimizer.step()
 
             if i % 100 == 0:
-                print(f"Epoch: {i / epochs}, Loss: {loss.average(dim=0).item()}")
+                print(f"Epoch: {i / epochs}, Loss: {loss.item()}")
 
         model.eval()
         correct = 0
