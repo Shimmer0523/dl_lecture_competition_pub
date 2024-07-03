@@ -78,6 +78,8 @@ def run(args: DictConfig):
         accuracy = correct / total
         print(f"Epoch: {epoch}, Accuracy: {accuracy:.4f}")
 
+    torch.save(model.state_dict(), "/content/model/pretrained_resnet.pth")
+
 
 if __name__ == "__main__":
     run()
