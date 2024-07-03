@@ -22,7 +22,11 @@ class Image2CategoryDataset(torch.utils.data.Dataset):
         with open(os.path.join(data_dir, f"{split}_image_paths.txt"), "r") as file:
             lines = file.readlines()
             lines = [
-                line.strip() if "/" in line else f"{line.split('_')[0]}/{line}"
+                (
+                    line.strip()
+                    if "/" in line
+                    else f"{'_'.join(line.split('_')[:-1])}/{line}"
+                )
                 for line in lines
             ]
         self.image_paths = [f"/content/data/Images/{line.strip()}" for line in lines]
