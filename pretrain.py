@@ -29,11 +29,15 @@ def run(args: DictConfig):
         ]
     )
 
-    train_dataset = Image2CategoryDataset("train", data_dir=args.data_dir)
+    train_dataset = Image2CategoryDataset(
+        "train", data_dir=args.data_dir, transform=transform
+    )
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=64, shuffle=True
     )
-    val_dataset = Image2CategoryDataset("val", data_dir=args.data_dir)
+    val_dataset = Image2CategoryDataset(
+        "val", data_dir=args.data_dir, transform=transform
+    )
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=64, shuffle=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
