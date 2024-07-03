@@ -64,8 +64,8 @@ def run(args: DictConfig):
             loss.backward()
             optimizer.step()
 
-            if i % 100 == 0:
-                print(f"Epoch: {i / epochs}, Loss: {loss.item()}")
+            if i % 10 == 0:
+                print(f"Epoch: {epoch}, Iteration: {i}, Loss: {loss.item()}")
 
         model.eval()
         correct = 0
@@ -81,7 +81,7 @@ def run(args: DictConfig):
                 correct += (cls == y).sum().item()
                 total += y.size(0)
         accuracy = correct / total
-        print(f"Epoch: {epoch}, Accuracy: {accuracy:.4f}")
+        print(f"Epoch: {epoch}, Accuracy: {accuracy}")
 
     torch.save(model.state_dict(), "/content/model/pretrained_resnet.pth")
 
