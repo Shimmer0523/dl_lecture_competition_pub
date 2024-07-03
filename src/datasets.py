@@ -21,6 +21,7 @@ class Image2CategoryDataset(torch.utils.data.Dataset):
         # 画像ファイルのパスをリスト化
         with open(os.path.join(data_dir, f"{split}_image_paths.txt"), "r") as file:
             lines = file.readlines()
+            print(lines[:10])
         self.image_paths = [f"/content/data/Images/{line.strip()}" for line in lines]
 
         # 画像のカテゴリラベル
