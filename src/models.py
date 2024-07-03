@@ -127,7 +127,7 @@ class ResNet18(nn.Module):
         x = self.layer4(x)
         x = self.adaptive_avg_pool(x)
         x = torch.flatten(x, 1)
-        x = self.fc(x)
+        x = F.softmax(self.fc(x))
         return x
 
 
