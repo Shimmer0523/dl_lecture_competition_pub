@@ -60,6 +60,7 @@ def run(args: DictConfig):
             # 順伝搬
             pred = model(img)
             loss = criterion(pred, y)
+            ic(loss)
 
             # 逆伝搬
             optimizer.zero_grad()
