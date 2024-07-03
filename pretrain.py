@@ -36,6 +36,7 @@ def run(args: DictConfig):
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=64, shuffle=True
     )
+    ic(len(train_loader))
     val_dataset = Image2CategoryDataset(
         "val", data_dir=args.data_dir, transform=transform
     )
@@ -53,7 +54,7 @@ def run(args: DictConfig):
         model.train()
         for i, (img, y) in enumerate(train_loader):
             img = img.to(device)
-            y = F.one_hot(y, num_classes=1854).float().to(device)
+            y = y.to(device)
 
             # 順伝搬
             pred = model(img)
