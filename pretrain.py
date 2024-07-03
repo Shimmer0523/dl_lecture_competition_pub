@@ -43,7 +43,7 @@ def run(args: DictConfig):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = ResNet18(in_channels=3, cls_num=1854).to(device)
+    model = ResNet18(cls_num=1854).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 

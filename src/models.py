@@ -48,7 +48,6 @@ class ResNet18(nn.Module):
 
     def __init__(
         self,
-        in_channels: int,
         cls_num: int,
     ):
         """
@@ -57,9 +56,9 @@ class ResNet18(nn.Module):
         cls_num[int]: 特徴ベクトルの次元数
         """
         super().__init__()
-        self.in_channels = in_channels
+        self.in_channels = 64
         self.conv1 = nn.Conv2d(
-            in_channels=in_channels, out_channels=64, kernel_size=7, stride=2, padding=3
+            in_channels=3, out_channels=64, kernel_size=7, stride=2, padding=3
         )
         self.batch_norm1 = nn.BatchNorm2d(64)
         self.max_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
