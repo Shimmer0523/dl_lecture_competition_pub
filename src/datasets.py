@@ -67,6 +67,12 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         self.num_classes = 1854
 
         self.X = torch.load(os.path.join(data_dir, f"{split}_X.pt"))
+        x = self.X[0]
+        ic(x.shape)
+        x = torchaudio.transforms.Spectrogram()(x)
+        x = torchaudio.transforms.AmplitudeToDB()(x)
+        ic(x.shape)
+        print("---")
         self.subject_idxs = torch.load(
             os.path.join(data_dir, f"{split}_subject_idxs.pt")
         )
