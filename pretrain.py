@@ -47,7 +47,7 @@ def run(args: DictConfig):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-    epochs = 10
+    epochs = 3
     for epoch in range(epochs):
 
         model.train()
@@ -83,7 +83,7 @@ def run(args: DictConfig):
         accuracy = correct / total
         print(f"Epoch: {epoch}, Accuracy: {accuracy}")
 
-    torch.save(model.state_dict(), "/content/model/pretrained_resnet.pth")
+    torch.save(model.state_dict(), "/content/drive/MyDrive/03_Colab Notebooks/DLBasics2023_colab/GraduationProject/model/pretrained_resnet.pth")
 
 
 if __name__ == "__main__":
