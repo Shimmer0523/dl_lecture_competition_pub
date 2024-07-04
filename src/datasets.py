@@ -59,11 +59,8 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         self,
         split: str,
         data_dir: str = "data",
-        transform: torchaudio.transforms.Compose = None,
     ) -> None:
         super().__init__()
-
-        self.transform = transform
 
         assert split in ["train", "val", "test"], f"Invalid split: {split}"
         self.split = split
@@ -87,9 +84,9 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         x = self.X[i]
 
         ic(x.shape)
-        if self.transform:
-            x = self.transform(x)
-            ic(x.shape)
+        x = torchaudio.transforms.Spectrogram()(x)
+        x = torchaudio.transforms.AmplitudeToDB()(x)
+        ic(x.shape)
         print("---")
 
         if hasattr(self, "y"):
