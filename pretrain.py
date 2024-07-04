@@ -45,7 +45,7 @@ def run(args: DictConfig):
 
     model = ResNet18(cls_num=1854).to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0015)
 
     epochs = 3
     for epoch in range(epochs):
