@@ -2,7 +2,33 @@ from icecream import ic
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.models
 from einops.layers.torch import Rearrange
+
+
+class MEGClip(nn.Module):
+    def __init__(self):
+        self.img_encoder = torchvision.models.resnet50(pretrained=True)
+        self.MEG_encoder = MEGTransformer(input_dim=271 * 281)
+
+
+class MEGTransformer(nn.Module):
+    def __init__(self, input_dim: int, hid_dim: int = 4096, output_dim: int = 2048):
+        super().__init__()
+
+        self.embedding = nn.Linear(input_dim, hid_dim)
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=hid_dim, nhead=8)
+        self.transformer_encoder = nn.TransformerEncoder(
+            encoder_layer=self.encoder_layer, num_layers=6
+        )
+        self.adaptive_avg_pool = nn.AdaptiveAvgPool1d(output_size=output_dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = x.reshape(x.shape[0], -1)
+        x = self.embedding(x)
+        x = self.transformer_encoder(x)
+        x = self.adaptive_avg_pool(x)
+        return x
 
 
 class ResidualBlock(nn.Module):
