@@ -1,7 +1,9 @@
 import os
+from icecream import ic
 import numpy as np
 import torch
-from torchvision import transforms
+import torchvision
+import torchaudio
 from PIL import Image
 from typing import Tuple
 from termcolor import cprint
@@ -12,7 +14,12 @@ import torch.utils.data
 class Image2CategoryDataset(torch.utils.data.Dataset):
     """画像と画像に対応するカテゴリラベルのデータセット"""
 
-    def __init__(self, split: str, data_dir: str, transform: transforms.Compose = None):
+    def __init__(
+        self,
+        split: str,
+        data_dir: str,
+        transform: torchvision.transforms.Compose = None,
+    ):
         super().__init__()
 
         # トランスフォーム
@@ -48,8 +55,15 @@ class Image2CategoryDataset(torch.utils.data.Dataset):
 class ThingsMEGDataset(torch.utils.data.Dataset):
     """脳波MEGデータと脳波に対応する画像のカテゴリラベルのデータセット"""
 
-    def __init__(self, split: str, data_dir: str = "data") -> None:
+    def __init__(
+        self,
+        split: str,
+        data_dir: str = "data",
+        transform: torchaudio.transforms.Compose = None,
+    ) -> None:
         super().__init__()
+
+        self.transform = transform
 
         assert split in ["train", "val", "test"], f"Invalid split: {split}"
         self.split = split
@@ -70,10 +84,18 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         return len(self.X)
 
     def __getitem__(self, i):
+        x = self.X[i]
+
+        ic(x.shape)
+        if self.transform:
+            x = self.transform(x)
+            ic(x.shape)
+        print("---")
+
         if hasattr(self, "y"):
-            return self.X[i], self.y[i], self.subject_idxs[i]
+            return x, self.y[i], self.subject_idxs[i]
         else:
-            return self.X[i], self.subject_idxs[i]
+            return x, self.subject_idxs[i]
 
     @property
     def num_channels(self) -> int:

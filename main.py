@@ -1,8 +1,10 @@
 import os, sys
 from icecream import ic
+import librosa
 import numpy as np
 import torch
 import torch.nn.functional as F
+import torchaudio
 from torchmetrics import Accuracy
 import hydra
 from omegaconf import DictConfig
@@ -28,11 +30,31 @@ def run(args: DictConfig):
     # ------------------
     loader_args = {"batch_size": args.batch_size, "num_workers": args.num_workers}
 
-    train_set = ThingsMEGDataset("train", args.data_dir)
+    transform = torchaudio.transforms.Compose(
+        [
+            torchaudio.transforms.Spectrogram(
+                n_fft=512, win_length=400, hop_length=160
+            ),
+            torchaudio.transforms.FrequencyMasking(freq_mask_param=15),
+            torchaudio.transforms.TimeMasking(time_mask_param=35),
+            torchaudio.transforms.AmplitudeToDB(),
+        ]
+    )
+
+    transform_test = torchaudio.transforms.Compose(
+        [
+            torchaudio.transforms.Spectrogram(
+                n_fft=512, win_length=400, hop_length=160
+            ),
+            torchaudio.transforms.AmplitudeToDB(),
+        ]
+    )
+
+    train_set = ThingsMEGDataset("train", args.data_dir, transform=transform)
     train_loader = torch.utils.data.DataLoader(train_set, shuffle=True, **loader_args)
-    val_set = ThingsMEGDataset("val", args.data_dir)
+    val_set = ThingsMEGDataset("val", args.data_dir, transform=transform)
     val_loader = torch.utils.data.DataLoader(val_set, shuffle=False, **loader_args)
-    test_set = ThingsMEGDataset("test", args.data_dir)
+    test_set = ThingsMEGDataset("test", args.data_dir, transform=transform_test)
     test_loader = torch.utils.data.DataLoader(
         test_set,
         shuffle=False,
