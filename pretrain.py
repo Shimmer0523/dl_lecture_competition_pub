@@ -44,7 +44,7 @@ def run(args: DictConfig):
     model = MEGClip().to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.0015)
 
-    epochs = 3
+    epochs = 1
     for epoch in range(epochs):
 
         model.train()
@@ -64,10 +64,10 @@ def run(args: DictConfig):
                 print(f"Epoch: {epoch}, Iteration: {i}, Loss: {loss.item()}")
 
     torch.save(
-        model.state_dict(),
+        model.MEG_encoder.state_dict(),
         "/content/drive/MyDrive/03_Colab Notebooks/DLBasics2023_colab/GraduationProject/model/pretrained_clip.pth",
     )
-
+    
 
 if __name__ == "__main__":
     run()
