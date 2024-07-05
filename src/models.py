@@ -8,6 +8,7 @@ from einops.layers.torch import Rearrange
 
 class MEGClip(nn.Module):
     def __init__(self):
+        super().__init__()
         self.temperature = 1.0
         self.img_encoder = ImageEncoder(emb_dim=2048)
         self.MEG_encoder = MEGTransformer(input_dim=271 * 281)
