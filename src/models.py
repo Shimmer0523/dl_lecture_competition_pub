@@ -68,132 +68,17 @@ class MEGTransformer(nn.Module):
         x = self.adaptive_avg_pool(x)
         return x
 
-
-class ResidualBlock(nn.Module):
-    """残差ブロック"""
-
-    def __init__(
-        self, in_channels: int, out_channels: int, stride: int, downsampler: nn.Module
-    ):
+class MEGClassifier(nn.Module):
+    def __init__(self, input_dim: int, num_classes: int, state_dict: dict = None):
         super().__init__()
-        self.conv1 = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=3,
-            stride=stride,
-            padding=1,
-        )
-        self.batch_norm1 = nn.BatchNorm2d(num_features=out_channels)
-        self.conv2 = nn.Conv2d(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            kernel_size=3,
-            stride=1,
-            padding=1,
-        )
-        self.batch_norm2 = nn.BatchNorm2d(num_features=out_channels)
-        self.downsampler = downsampler
-
+        self.encoder = MEGTransformer(input_dim=input_dim, hid_dim=512, output_dim=512)
+        self.encoder.load_state_dict(state_dict)
+        self.classifier = nn.Linear(512, num_classes)
+    
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        residual = x
-        z = F.relu(self.batch_norm1(self.conv1(x)))
-        z = self.batch_norm2(self.conv2(z))
-
-        if self.downsampler:
-            residual = self.downsampler(x)
-
-        z += residual
-        z = F.relu(z)
-        return z
-
-
-class ResNet18(nn.Module):
-    """ResNet18"""
-
-    def __init__(
-        self,
-        cls_num: int,
-    ):
-        """
-        Args:
-        in_channels[int]: 入力のチャネル数
-        cls_num[int]: 特徴ベクトルの次元数
-        """
-        super().__init__()
-        self.in_channels = 64
-        self.conv1 = nn.Conv2d(
-            in_channels=3, out_channels=64, kernel_size=7, stride=2, padding=3
-        )
-        self.batch_norm1 = nn.BatchNorm2d(64)
-        self.max_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-
-        self.layer1 = self._make_layer(out_channels=64, block_num=2, stride=1)
-        self.layer2 = self._make_layer(
-            out_channels=128,
-            block_num=2,
-            stride=2,
-        )
-        self.layer3 = self._make_layer(
-            out_channels=256,
-            block_num=2,
-            stride=2,
-        )
-        self.layer4 = self._make_layer(
-            out_channels=512,
-            block_num=2,
-            stride=2,
-        )
-        self.adaptive_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512, cls_num)
-
-        # 重みの初期化
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-
-    def _make_layer(
-        self,
-        out_channels: int,
-        block_num: int,
-        stride: int,
-    ):
-        downsampler = None
-        if stride != 1 or (self.in_channels != out_channels):
-            downsampler = nn.Sequential(
-                nn.Conv2d(
-                    in_channels=self.in_channels,
-                    out_channels=out_channels,
-                    kernel_size=1,
-                    stride=stride,
-                ),
-                nn.BatchNorm2d(num_features=out_channels),
-            )
-
-        layers = []
-        layers.append(
-            ResidualBlock(self.in_channels, out_channels, stride, downsampler)
-        )
-        self.in_channels = out_channels
-        for _ in range(1, block_num):
-            layers.append(ResidualBlock(out_channels, out_channels, 1, None))
-
-        return nn.Sequential(*layers)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = F.relu(self.batch_norm1(self.conv1(x)))
-        x = self.max_pool(x)
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-        x = self.adaptive_avg_pool(x)
-        x = torch.flatten(x, 1)
-        x = self.fc(x)
+        x = self.encoder(x)
+        x = F.softmax(self.classifier(x))
         return x
-
 
 class BasicConvClassifier(nn.Module):
     def __init__(
