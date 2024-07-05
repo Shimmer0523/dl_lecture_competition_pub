@@ -1,16 +1,92 @@
+from icecream import ic
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.models
 from einops.layers.torch import Rearrange
+
+
+class MEGClip(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.temperature = 1.0
+        self.img_encoder = ImageEncoder()
+        self.MEG_encoder = MEGTransformer(
+            input_dim=271 * 281, hid_dim=512, output_dim=512
+        )
+
+    def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
+        img_embedding = self.img_encoder(img)
+        MEG_embedding = self.MEG_encoder(MEG)
+
+        logit = (img_embedding @ MEG_embedding.T) / self.temperature
+        img_similarity = img_embedding @ img_embedding.T
+        MEG_similarity = MEG_embedding @ MEG_embedding.T
+        target = F.softmax(
+            (img_similarity + MEG_similarity) / 2 * self.temperature, dim=-1
+        )
+        img_loss = F.cross_entropy(logit, target)
+        MEG_loss = F.cross_entropy(logit.T, target.T)
+        loss = (img_loss + MEG_loss) / 2
+        return loss.mean()
+
+
+class ImageEncoder(nn.Module):
+    """画像の特徴量を抽出するモデル"""
+
+    def __init__(self):
+        super().__init__()
+        self.encoder = torchvision.models.resnet18(pretrained=True)
+        self.features = nn.Sequential(*list(self.encoder.children())[:-2])
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.features(x)
+        x = F.adaptive_avg_pool2d(x, (1, 1))
+        x = x.view(x.size(0), -1)
+        return x
+
+
+class MEGTransformer(nn.Module):
+    def __init__(self, input_dim: int, hid_dim: int = 4096, output_dim: int = 2048):
+        """コンストラクタ
+        Args:
+        input_dim[int]: 入力の次元数(時系列の長さ * チャネル数)
+        hid_dim[int]: 隠れ層の次元数
+        output_dim[int]: 出力の次元数
+        """
+        super().__init__()
+
+        self.embedding = nn.Linear(input_dim, hid_dim)
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=hid_dim, nhead=8)
+        self.transformer_encoder = nn.TransformerEncoder(
+            encoder_layer=self.encoder_layer, num_layers=6
+        )
+        self.adaptive_avg_pool = nn.AdaptiveAvgPool1d(output_size=output_dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = x.reshape(x.shape[0], -1)
+        x = F.relu(self.embedding(x))
+        x = self.transformer_encoder(x)
+        x = self.adaptive_avg_pool(x)
+        return x
+
+
+class MEGClassifier(nn.Module):
+    def __init__(self, input_dim: int, num_classes: int, state_dict: dict = None):
+        super().__init__()
+        self.encoder = MEGTransformer(input_dim=input_dim, hid_dim=512, output_dim=512)
+        self.encoder.load_state_dict(state_dict)
+        self.classifier = nn.Linear(512, num_classes)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.encoder(x)
+        x = F.softmax(self.classifier(x))
+        return x
 
 
 class BasicConvClassifier(nn.Module):
     def __init__(
-        self,
-        num_classes: int,
-        seq_len: int,
-        in_channels: int,
-        hid_dim: int = 128
+        self, num_classes: int, seq_len: int, in_channels: int, hid_dim: int = 128
     ) -> None:
         super().__init__()
 
@@ -46,14 +122,14 @@ class ConvBlock(nn.Module):
         p_drop: float = 0.1,
     ) -> None:
         super().__init__()
-        
+
         self.in_dim = in_dim
         self.out_dim = out_dim
 
         self.conv0 = nn.Conv1d(in_dim, out_dim, kernel_size, padding="same")
         self.conv1 = nn.Conv1d(out_dim, out_dim, kernel_size, padding="same")
         # self.conv2 = nn.Conv1d(out_dim, out_dim, kernel_size) # , padding="same")
-        
+
         self.batchnorm0 = nn.BatchNorm1d(num_features=out_dim)
         self.batchnorm1 = nn.BatchNorm1d(num_features=out_dim)
 
