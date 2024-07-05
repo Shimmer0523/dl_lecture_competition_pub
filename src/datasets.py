@@ -112,12 +112,6 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         self.num_classes = 1854
 
         self.X = torch.load(os.path.join(data_dir, f"{split}_X.pt"))
-        x = self.X[0]
-        ic(x.shape)
-        x = torchaudio.transforms.Spectrogram()(x)
-        x = torchaudio.transforms.AmplitudeToDB()(x)
-        ic(x.shape)
-        print("---")
         self.subject_idxs = torch.load(
             os.path.join(data_dir, f"{split}_subject_idxs.pt")
         )
@@ -132,18 +126,10 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         return len(self.X)
 
     def __getitem__(self, i):
-        x = self.X[i]
-
-        ic(x.shape)
-        x = torchaudio.transforms.Spectrogram()(x)
-        x = torchaudio.transforms.AmplitudeToDB()(x)
-        ic(x.shape)
-        print("---")
-
         if hasattr(self, "y"):
-            return x, self.y[i], self.subject_idxs[i]
+            return self.X[i], self.y[i], self.subject_idxs[i]
         else:
-            return x, self.subject_idxs[i]
+            return self.X[i], self.subject_idxs[i]
 
     @property
     def num_channels(self) -> int:
