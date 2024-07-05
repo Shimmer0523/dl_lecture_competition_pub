@@ -9,7 +9,7 @@ from einops.layers.torch import Rearrange
 class MEGClip(nn.Module):
     def __init__(self):
         self.temperature = 1.0
-        self.img_encoder = torchvision.models.resnet50(pretrained=True)
+        self.img_encoder = ImageEncoder(emb_dim=2048)
         self.MEG_encoder = MEGTransformer(input_dim=271 * 281)
 
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
@@ -26,6 +26,21 @@ class MEGClip(nn.Module):
         MEG_loss = F.cross_entropy(logit.T, target.T)
         loss = (img_loss + MEG_loss) / 2
         return loss.mean()
+
+
+class ImageEncoder(nn.Module):
+    """画像の特徴量を抽出するモデル"""
+
+    def __init__(self, emb_dim: int):
+        super().__init__()
+        self.encoder = torchvision.models.resnet50(pretrained=True)
+        self.features = nn.Sequential(*list(self.encoder.children())[:-2])
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.features(x)
+        x = F.adaptive_avg_pool2d(x, (1, 1))
+        x = x.view(x.size(0), -1)
+        return x
 
 
 class MEGTransformer(nn.Module):
@@ -47,7 +62,7 @@ class MEGTransformer(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x.reshape(x.shape[0], -1)
-        x = self.embedding(x)
+        x = F.relu(self.embedding(x))
         x = self.transformer_encoder(x)
         x = self.adaptive_avg_pool(x)
         return x
