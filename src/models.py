@@ -10,12 +10,14 @@ class MEGClip(nn.Module):
     def __init__(self):
         super().__init__()
         self.temperature = 1.0
-        self.img_encoder = ImageEncoder(emb_dim=2048)
-        self.MEG_encoder = MEGTransformer(input_dim=271 * 281, output_dim=512)
+        self.img_encoder = ImageEncoder()
+        self.MEG_encoder = MEGTransformer(input_dim=271 * 281, hid_dim=512, output_dim=512)
 
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
         img_embedding = self.img_encoder(img)
+        ic(img_embedding.shape)
         MEG_embedding = self.MEG_encoder(MEG)
+        ic(MEG_embedding.shape)
 
         logit = (img_embedding @ MEG_embedding.T) / self.temperature
         img_similarity = img_embedding @ img_embedding.T
@@ -32,7 +34,7 @@ class MEGClip(nn.Module):
 class ImageEncoder(nn.Module):
     """画像の特徴量を抽出するモデル"""
 
-    def __init__(self, emb_dim: int):
+    def __init__(self):
         super().__init__()
         self.encoder = torchvision.models.resnet18(pretrained=True)
         self.features = nn.Sequential(*list(self.encoder.children())[:-2])
