@@ -38,15 +38,11 @@ def run(args: DictConfig):
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=64, shuffle=True
     )
-    val_dataset = MEG2ImageDataset(
-        "val", data_dir=args.data_dir, transform=img_transform
-    )
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=64, shuffle=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = MEGClip().to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.0015)
+    optimizer = optim.Adam(model.parameters(), lr=3.0015)
 
     epochs = 3
     for epoch in range(epochs):
