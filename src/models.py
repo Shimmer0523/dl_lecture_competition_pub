@@ -8,12 +8,34 @@ from einops.layers.torch import Rearrange
 
 class MEGClip(nn.Module):
     def __init__(self):
+        self.temperature = 1.0
         self.img_encoder = torchvision.models.resnet50(pretrained=True)
         self.MEG_encoder = MEGTransformer(input_dim=271 * 281)
+
+    def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
+        img_embedding = self.img_encoder(img)
+        MEG_embedding = self.MEG_encoder(MEG)
+
+        logit = (img_embedding @ MEG_embedding.T) / self.temperature
+        img_similarity = img_embedding @ img_embedding.T
+        MEG_similarity = MEG_embedding @ MEG_embedding.T
+        target = F.softmax(
+            (img_similarity + MEG_similarity) / 2 * self.temperature, dim=-1
+        )
+        img_loss = F.cross_entropy(logit, target)
+        MEG_loss = F.cross_entropy(logit.T, target.T)
+        loss = (img_loss + MEG_loss) / 2
+        return loss.mean()
 
 
 class MEGTransformer(nn.Module):
     def __init__(self, input_dim: int, hid_dim: int = 4096, output_dim: int = 2048):
+        """コンストラクタ
+        Args:
+        input_dim[int]: 入力の次元数(時系列の長さ * チャネル数)
+        hid_dim[int]: 隠れ層の次元数
+        output_dim[int]: 出力の次元数
+        """
         super().__init__()
 
         self.embedding = nn.Linear(input_dim, hid_dim)

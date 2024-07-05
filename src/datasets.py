@@ -2,6 +2,7 @@ import os
 from icecream import ic
 import numpy as np
 import torch
+import torch.nn as nn
 import torchvision
 import torchaudio
 from PIL import Image
@@ -9,6 +10,50 @@ from typing import Tuple
 from termcolor import cprint
 import torch.utils
 import torch.utils.data
+
+
+class MEG2ImageDataset(torch.utils.data.Dataset):
+    """脳波MEGデータと脳波に対応する画像のデータセット"""
+
+    def __init__(
+        self,
+        split: str,
+        data_dir: str,
+        transform: torchvision.transforms.Compose,
+    ) -> None:
+        super().__init__()
+
+        assert split in ["train", "val", "test"], f"Invalid split: {split}"
+        self.split = split
+
+        # MEG
+        self.X = torch.load(os.path.join(data_dir, f"{split}_X.pt"))
+
+        # 画像ファイルのパスをリスト化
+        with open(os.path.join(data_dir, f"{split}_image_paths.txt"), "r") as file:
+            lines = file.readlines()
+            lines = [
+                (
+                    line.strip()
+                    if "/" in line
+                    else f"{'_'.join(line.split('_')[:-1])}/{line}"
+                )
+                for line in lines
+            ]
+        self.image_paths = [f"/content/data/Images/{line.strip()}" for line in lines]
+
+        self.transform = transform
+
+    def __len__(self) -> int:
+        return len(self.X)
+
+    def __getitem__(self, i: int) -> Tuple[torch.Tensor, Image.Image]:
+        x = self.X[i]
+        img = Image.open(self.image_paths[i]).convert("RGB")
+        if self.transform:
+            img = self.transform(img)
+
+        return x, img
 
 
 class Image2CategoryDataset(torch.utils.data.Dataset):
