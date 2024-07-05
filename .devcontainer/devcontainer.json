@@ -1,0 +1,20 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+  },
+    "customizations": {
+    "vscode": {
+      "settings": {
+        "python.formatting.provider": "black",
+        "workbench.colorTheme": "Monokai"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "ms-toolsai.jupyter"
+      ]
+    }
+  },
+  "postCreateCommand": "pip install -r requirements.txt"
+}
