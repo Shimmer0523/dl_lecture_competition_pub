@@ -48,7 +48,7 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         return len(self.X)
 
     def __getitem__(self, i: int) -> Tuple[torch.Tensor, Image.Image]:
-        x = self.X[i]
+        x = self.X[i].reshape(1, -1)
         img = Image.open(self.image_paths[i]).convert("RGB")
         if self.transform:
             img = self.transform(img)

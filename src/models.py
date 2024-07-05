@@ -34,7 +34,7 @@ class ImageEncoder(nn.Module):
 
     def __init__(self, emb_dim: int):
         super().__init__()
-        self.encoder = torchvision.models.resnet50(pretrained=True)
+        self.encoder = torchvision.models.resnet18(pretrained=True)
         self.features = nn.Sequential(*list(self.encoder.children())[:-2])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
