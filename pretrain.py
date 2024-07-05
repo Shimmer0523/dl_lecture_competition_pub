@@ -65,7 +65,7 @@ def run(args: DictConfig):
 
     torch.save(
         model.state_dict(),
-        "/content/drive/MyDrive/03_Colab Notebooks/DLBasics2023_colab/GraduationProject/model/pretrained_resnet.pth",
+        "/content/drive/MyDrive/03_Colab Notebooks/DLBasics2023_colab/GraduationProject/model/pretrained_clip.pth",
     )
 
 
