@@ -12,7 +12,7 @@ class MEGClip(nn.Module):
         self.temperature = 1.0
         self.img_encoder = ImageEncoder()
         self.MEG_encoder = MEGTransformer(
-            input_dim=271 * 281, hid_dim=512, output_dim=512
+            input_dim=271 * 281, hid_dim=4096, output_dim=512
         )
 
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
@@ -36,7 +36,7 @@ class ImageEncoder(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.encoder = torchvision.models.resnet18(pretrained=True)
+        self.encoder = torchvision.models.resnet34(pretrained=True)
         self.features = nn.Sequential(*list(self.encoder.children())[:-2])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
