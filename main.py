@@ -48,7 +48,7 @@ def run(args: DictConfig):
     model = MEGClassifier(
         input_dim=train_set.seq_len * train_set.num_channels,
         num_classes=train_set.num_classes,
-        state_dict=torch.load(args.pretrained_model_path),
+        state_dict=torch.load(args.pretrained_model),
     ).to(args.device)
 
     # ------------------
