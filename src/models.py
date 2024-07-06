@@ -11,11 +11,13 @@ class MEGClip(nn.Module):
         super().__init__()
         self.temperature = 1.0
         self.img_encoder = ImageEncoder()
-        self.MEG_encoder = MEGTransformer(input_dim=271, hid_dim=1024, output_dim=512)
+        self.MEG_encoder = MEGLSTM(hid_dim=512)
 
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
         img_embedding = self.img_encoder(img)
         MEG_embedding = self.MEG_encoder(MEG)
+        ic(img_embedding.shape)
+        ic(MEG_embedding.shape)
 
         logit = (img_embedding @ MEG_embedding.T) / self.temperature
         img_similarity = img_embedding @ img_embedding.T
@@ -42,6 +44,23 @@ class ImageEncoder(nn.Module):
         x = F.adaptive_avg_pool2d(x, (1, 1))
         x = x.view(x.size(0), -1)
         return x
+
+
+class MEGLSTM(nn.Module):
+    def __init__(self, hid_dim: int):
+        super().__init__()
+        self.lstm = nn.LSTM(
+            input_size=271 * 281,
+            hidden_size=512,
+            num_layersd=2,
+            batch_first=True,
+            dropout=0.25,
+        )
+        self.fc = nn.Linear(512, 512)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        _, (h, _) = self.lstm(x)
+        return h[-1]
 
 
 class MEGTransformer(nn.Module):

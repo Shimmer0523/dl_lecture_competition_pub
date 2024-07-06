@@ -51,7 +51,7 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         X_path = os.path.join(
             self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy"
         )
-        X = torch.from_numpy(np.load(X_path))
+        X = torch.from_numpy(np.load(X_path)).view(1, -1)
 
         subject_idx_path = os.path.join(
             self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy"
