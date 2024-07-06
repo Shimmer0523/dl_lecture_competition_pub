@@ -54,7 +54,12 @@ class MEGLSTM(nn.Module):
             batch_first=True,
             dropout=0.25,
         )
-        self.fc = nn.Linear(512, 512)
+        params = 0
+        for p in self.lstm.parameters():
+            if p.requires_grad:
+                params += p.numel()
+
+        print(params)
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         _, (h, _) = self.lstm(X)

@@ -36,7 +36,7 @@ def run(args: DictConfig):
         "train", data_dir=args.data_dir, transform=img_transform
     )
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=32, shuffle=True
+        train_dataset, batch_size=64, shuffle=True
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -44,7 +44,7 @@ def run(args: DictConfig):
     model = MEGClip().to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
-    epochs = 3
+    epochs = 1
     for epoch in range(epochs):
 
         model.train()
