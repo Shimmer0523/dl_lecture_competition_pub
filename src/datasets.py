@@ -24,11 +24,10 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
     ) -> None:
         super().__init__()
 
-        assert split in ["train", "val", "test"], f"Invalid split: {split}"
         self.split = split
-
-        # MEG
-        self.X = torch.load(os.path.join(data_dir, f"{split}_X.pt"))
+        self.data_dir = data_dir
+        self.num_classes = 1854
+        self.num_samples = len(glob(os.path.join(data_dir, f"{split}_X", "*.npy")))
 
         # 画像ファイルのパスをリスト化
         with open(os.path.join(data_dir, f"{split}_image_paths.txt"), "r") as file:
@@ -49,12 +48,21 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         return len(self.X)
 
     def __getitem__(self, i: int) -> Tuple[torch.Tensor, Image.Image]:
-        x = self.X[i].reshape(1, -1)
+        X_path = os.path.join(
+            self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy"
+        )
+        X = torch.from_numpy(np.load(X_path))
+
+        subject_idx_path = os.path.join(
+            self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy"
+        )
+        subject_idx = torch.from_numpy(np.load(subject_idx_path))
+
         img = Image.open(self.image_paths[i]).convert("RGB")
         if self.transform:
             img = self.transform(img)
 
-        return x, img
+        return X, img, subject_idx
 
 
 class ThingsMEGDataset(torch.utils.data.Dataset):
