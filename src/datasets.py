@@ -45,7 +45,7 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         self.transform = transform
 
     def __len__(self) -> int:
-        return len(self.num_samples)
+        return self.num_samples
 
     def __getitem__(self, i: int) -> Tuple[torch.Tensor, Image.Image]:
         X_path = os.path.join(
