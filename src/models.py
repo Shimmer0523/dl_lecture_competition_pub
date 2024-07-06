@@ -141,7 +141,6 @@ class ConvBlock(nn.Module):
         self.dropout = nn.Dropout(p_drop)
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
-        ic(X.shape)
         if self.in_dim == self.out_dim:
             X = self.conv0(X) + X  # skip connection
         else:
