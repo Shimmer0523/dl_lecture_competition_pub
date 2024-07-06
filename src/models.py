@@ -14,6 +14,8 @@ class MEGClip(nn.Module):
         self.MEG_encoder = MEGLSTM()
 
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
+        ic(img.shape)
+        ic(MEG.shape)
         img_embedding = self.img_encoder(img)
         MEG_embedding = self.MEG_encoder(MEG)
 
