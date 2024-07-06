@@ -11,9 +11,7 @@ class MEGClip(nn.Module):
         super().__init__()
         self.temperature = 1.0
         self.img_encoder = ImageEncoder()
-        self.MEG_encoder = MEGTransformer(
-            input_dim=271 * 281, hid_dim=1024, output_dim=512
-        )
+        self.MEG_encoder = MEGTransformer(input_dim=271, hid_dim=1024, output_dim=512)
 
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
         img_embedding = self.img_encoder(img)
