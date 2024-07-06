@@ -39,8 +39,8 @@ class ImageEncoder(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.encoder = torchvision.models.resnet34(pretrained=True)
-        self.features = nn.Sequential(*list(self.encoder.children())[:-2])
+        self.encoder = torchvision.models.resnet50(pretrained=True)
+        self.features = nn.Sequential(*list(self.encoder.children())[:-1])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)
@@ -54,7 +54,7 @@ class MEGLSTM(nn.Module):
         super().__init__()
         self.lstm = nn.LSTM(
             input_size=658,
-            hidden_size=512,
+            hidden_size=2048,
             num_layers=2,
             batch_first=True,
             dropout=0.25,
