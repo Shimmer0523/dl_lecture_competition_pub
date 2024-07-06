@@ -57,7 +57,6 @@ class MEGLSTM(nn.Module):
         self.fc = nn.Linear(512, 512)
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
-        ic(X.shape)
         _, (h, _) = self.lstm(X)
         return h[-1]
 
