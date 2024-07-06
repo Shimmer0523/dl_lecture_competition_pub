@@ -61,6 +61,7 @@ class MEGLSTM(nn.Module):
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         ic(X.shape)
         _, (h, _) = self.lstm(X)
+        ic(h.shape)
         return h[-1]
 
 
