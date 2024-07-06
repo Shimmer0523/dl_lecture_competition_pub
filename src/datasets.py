@@ -56,7 +56,7 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         ic(X.shape)
         X = X[:, 1:3, :]
         ic(X.shape)
-        X = X.view(X.shape[0], -1)
+        X = X.reshape(X.shape[0], -1)
 
         subject_idx_path = os.path.join(
             self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy"
