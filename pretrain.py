@@ -48,7 +48,7 @@ def run(args: DictConfig):
     for epoch in range(epochs):
 
         model.train()
-        for i, (X, img) in enumerate(train_loader):
+        for i, (X, img, subject_idx) in enumerate(train_loader):
             X = X.to(device)
             img = img.to(device)
 
