@@ -53,8 +53,8 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         )
         X = torch.from_numpy(np.load(X_path))
         X = torchaudio.transforms.Spectrogram(n_fft=12)(X)
-        X = X[:, 1:3, :]
-        X = X.reshape(X.shape[0], -1)
+        X = X[1:3, :]
+        X = X.reshape(1, -1)
 
         subject_idx_path = os.path.join(
             self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy"
@@ -64,8 +64,6 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         img = Image.open(self.image_paths[i]).convert("RGB")
         if self.transform:
             img = self.transform(img)
-
-        ic(X.shape)
 
         return X, img, subject_idx
 

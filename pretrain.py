@@ -49,7 +49,6 @@ def run(args: DictConfig):
 
         model.train()
         for i, (X, img, subject_idx) in enumerate(train_loader):
-            ic(X.shape)
             X = X.to(device)
             img = img.to(device)
 
