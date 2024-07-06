@@ -42,7 +42,7 @@ def run(args: DictConfig):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = MEGClip().to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
     epochs = 3
     for epoch in range(epochs):
