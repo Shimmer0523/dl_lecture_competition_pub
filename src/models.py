@@ -67,18 +67,17 @@ class MEGClassifier(nn.Module):
         self.encoder.load_state_dict(state_dict)
 
         self.classifier = nn.Sequential(
-            nn.Linear(512, 1024),
+            nn.Linear(2048, 4096),
             nn.ReLU(),
             nn.Dropout(0.1),
-            nn.Linear(1024, 512),
+            nn.Linear(4096, 2048),
             nn.ReLU(),
             nn.Dropout(0.1),
-            nn.Linear(512, num_classes),
+            nn.Linear(2048, num_classes),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.encoder(x)
-        ic(x.shape)
         x = F.softmax(self.classifier(x))
         return x
 
