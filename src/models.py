@@ -68,6 +68,7 @@ class MEGTransformer(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.blocks(x)
+        ic(x.shape)
         x = self.transformer_encoder(x)
         x = self.adaptive_avg_pool(x)
         x = self.fc(x)
