@@ -14,13 +14,8 @@ class MEGClip(nn.Module):
         self.MEG_encoder = MEGLSTM()
 
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
-        ic(img.shape)
-        ic(MEG.shape)
         img_embedding = self.img_encoder(img)
         MEG_embedding = self.MEG_encoder(MEG)
-
-        ic(img_embedding.shape)
-        ic(MEG_embedding.shape)
 
         logit = (img_embedding @ MEG_embedding.T) / self.temperature
         img_similarity = img_embedding @ img_embedding.T
@@ -139,7 +134,6 @@ class ConvBlock(nn.Module):
         self.dropout = nn.Dropout(p_drop)
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
-        ic(X.shape)
         if self.in_dim == self.out_dim:
             X = self.conv0(X) + X  # skip connection
         else:
