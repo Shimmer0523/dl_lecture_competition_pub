@@ -11,7 +11,7 @@ class MEGClip(nn.Module):
         super().__init__()
         self.temperature = 1.0
         self.img_encoder = ImageEncoder()
-        self.MEG_encoder = MEGLSTM(input_dim=658)
+        self.MEG_encoder = MEGLSTM()
 
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
         img_embedding = self.img_encoder(img)
@@ -45,10 +45,10 @@ class ImageEncoder(nn.Module):
 
 
 class MEGLSTM(nn.Module):
-    def __init__(self, input_dim: int):
+    def __init__(self):
         super().__init__()
         self.lstm = nn.LSTM(
-            input_size=input_dim,
+            input_size=329,
             hidden_size=1024,
             num_layers=2,
             batch_first=True,
@@ -61,9 +61,9 @@ class MEGLSTM(nn.Module):
 
 
 class MEGClassifier(nn.Module):
-    def __init__(self, input_dim: int, num_classes: int, state_dict: dict = None):
+    def __init__(self, num_classes: int, state_dict: dict = None):
         super().__init__()
-        self.encoder = MEGLSTM(input_dim=input_dim)
+        self.encoder = MEGLSTM()
         self.encoder.load_state_dict(state_dict)
 
         self.classifier = nn.Sequential(
