@@ -35,7 +35,6 @@ def run(args: DictConfig):
     train_dataset = MEG2ImageDataset(
         "train", data_dir=args.data_dir, transform=img_transform
     )
-    print(len(train_dataset))
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=32, shuffle=True
     )
