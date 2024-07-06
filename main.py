@@ -10,7 +10,7 @@ from termcolor import cprint
 from tqdm import tqdm
 
 from src.datasets import ThingsMEGDataset
-from src.models import MEGClassifier
+from src.models import MEGClassifier, BasicConvClassifier
 from src.utils import set_seed
 
 
@@ -42,13 +42,13 @@ def run(args: DictConfig):
     # ------------------
     #       Model
     # ------------------
-    # model = BasicConvClassifier(
-    #    train_set.num_classes, train_set.seq_len, train_set.num_channels
-    # ).to(args.device)
-    model = MEGClassifier(
-        num_classes=train_set.num_classes,
-        state_dict=torch.load(args.pretrained_model),
+    model = BasicConvClassifier(
+        train_set.num_classes, train_set.seq_len, train_set.num_channels
     ).to(args.device)
+    # model = MEGClassifier(
+    #     num_classes=train_set.num_classes,
+    #     state_dict=torch.load(args.pretrained_model),
+    # ).to(args.device)
 
     # ------------------
     #     Optimizer
