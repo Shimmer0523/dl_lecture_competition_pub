@@ -45,11 +45,11 @@ class ImageEncoder(nn.Module):
 
 
 class MEGLSTM(nn.Module):
-    def __init__(self, hid_dim: int):
+    def __init__(self, input_dim: int):
         super().__init__()
         self.lstm = nn.LSTM(
-            input_size=658,
-            hidden_size=512,
+            input_size=input_dim,
+            hidden_size=1024,
             num_layers=2,
             batch_first=True,
             dropout=0.25,
@@ -60,43 +60,21 @@ class MEGLSTM(nn.Module):
         return h[-1]
 
 
-class MEGTransformer(nn.Module):
-    def __init__(self, input_dim: int, hid_dim: int = 4096, output_dim: int = 2048):
-        """コンストラクタ
-        Args:
-        input_dim[int]: 入力の次元数(時系列の長さ * チャネル数)
-        hid_dim[int]: 隠れ層の次元数
-        output_dim[int]: 出力の次元数
-        """
-        super().__init__()
-
-        self.blocks = nn.Sequential(
-            ConvBlock(input_dim, hid_dim),
-            ConvBlock(hid_dim, hid_dim),
-        )
-
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=hid_dim, nhead=8)
-        self.transformer_encoder = nn.TransformerEncoder(
-            encoder_layer=self.encoder_layer, num_layers=6
-        )
-        self.adaptive_avg_pool = nn.AdaptiveAvgPool1d(hid_dim)
-        self.fc = nn.Linear(hid_dim, output_dim)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.blocks(x)
-        ic(x.shape)
-        x = self.transformer_encoder(x)
-        x = self.adaptive_avg_pool(x)
-        x = self.fc(x)
-        return x
-
-
 class MEGClassifier(nn.Module):
     def __init__(self, input_dim: int, num_classes: int, state_dict: dict = None):
         super().__init__()
-        self.encoder = MEGTransformer(input_dim=input_dim, hid_dim=512, output_dim=512)
+        self.encoder = MEGLSTM(input_dim=input_dim)
         self.encoder.load_state_dict(state_dict)
-        self.classifier = nn.Linear(512, num_classes)
+
+        self.classifier = nn.Sequential(
+            nn.Linear(512, 1024),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(512, num_classes),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.encoder(x)
