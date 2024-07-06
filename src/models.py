@@ -56,18 +56,23 @@ class MEGTransformer(nn.Module):
         """
         super().__init__()
 
-        self.embedding = nn.Linear(input_dim, hid_dim)
+        self.blocks = nn.Sequential(
+            ConvBlock(input_dim, hid_dim),
+            ConvBlock(hid_dim, hid_dim),
+        )
+
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=hid_dim, nhead=8)
         self.transformer_encoder = nn.TransformerEncoder(
             encoder_layer=self.encoder_layer, num_layers=6
         )
-        self.adaptive_avg_pool = nn.AdaptiveAvgPool1d(output_size=output_dim)
+        self.adaptive_avg_pool = nn.AdaptiveAvgPool1d(hid_dim)
+        self.fc = nn.Linear(hid_dim, output_dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x.reshape(x.shape[0], -1)
-        x = F.relu(self.embedding(x))
+        x = self.blocks(x)
         x = self.transformer_encoder(x)
         x = self.adaptive_avg_pool(x)
+        x = self.fc(x)
         return x
 
 
