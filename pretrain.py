@@ -60,7 +60,7 @@ def run(args: DictConfig):
             loss.backward()
             optimizer.step()
 
-            if i % 10 == 0:
+            if i % 100 == 0:
                 print(f"Epoch: {epoch}, Iteration: {i}, Loss: {loss.item()}")
 
     torch.save(
