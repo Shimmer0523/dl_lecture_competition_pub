@@ -17,6 +17,9 @@ class MEGClip(nn.Module):
         img_embedding = self.img_encoder(img)
         MEG_embedding = self.MEG_encoder(MEG)
 
+        ic(img_embedding.shape)
+        ic(MEG_embedding.shape)
+
         logit = (img_embedding @ MEG_embedding.T) / self.temperature
         img_similarity = img_embedding @ img_embedding.T
         MEG_similarity = MEG_embedding @ MEG_embedding.T
