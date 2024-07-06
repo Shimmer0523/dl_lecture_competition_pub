@@ -78,6 +78,7 @@ class MEGClassifier(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.encoder(x)
+        ic(x.shape)
         x = F.softmax(self.classifier(x))
         return x
 
