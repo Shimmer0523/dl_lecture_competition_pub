@@ -54,7 +54,7 @@ class MEGLSTM(nn.Module):
         super().__init__()
         self.lstm = nn.LSTM(
             input_size=658,
-            hidden_size=1024,
+            hidden_size=512,
             num_layers=2,
             batch_first=True,
             dropout=0.25,
