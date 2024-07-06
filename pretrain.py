@@ -36,7 +36,7 @@ def run(args: DictConfig):
         "train", data_dir=args.data_dir, transform=img_transform
     )
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=64, shuffle=True
+        train_dataset, batch_size=128, shuffle=True
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
