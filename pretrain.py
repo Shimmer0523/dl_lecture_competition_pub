@@ -44,7 +44,7 @@ def run(args: DictConfig):
     model = MEGClip().to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
-    epochs = 1
+    epochs = 2
     for epoch in range(epochs):
 
         model.train()
