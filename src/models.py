@@ -16,8 +16,6 @@ class MEGClip(nn.Module):
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
         img_embedding = self.img_encoder(img)
         MEG_embedding = self.MEG_encoder(MEG)
-        ic(img_embedding.shape)
-        ic(MEG_embedding.shape)
 
         logit = (img_embedding @ MEG_embedding.T) / self.temperature
         img_similarity = img_embedding @ img_embedding.T
