@@ -61,11 +61,8 @@ class MEGLSTM(nn.Module):
         )
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
-        ic(X.shape)
-        o, (h, _) = self.lstm(X)
-        ic(o.shape)
-        ic(h.shape)
-        return h[-1]
+        y, _ = self.lstm(X)
+        return y
 
 
 class MEGClassifier(nn.Module):
