@@ -65,6 +65,8 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         if self.transform:
             img = self.transform(img)
 
+        ic(X.shape)
+
         return X, img, subject_idx
 
 
