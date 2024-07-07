@@ -91,6 +91,8 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
             X, orig_freq=200, new_freq=100, lowpass_filter_width=256
         )
         ic(X.shape)
+        ic(X.mean(axis=1))
+
         X = X - X.mean(axis=1)
         # X = torchaudio.transforms.Spectrogram(n_fft=12)(X)
         # X = X[1:3, :]
