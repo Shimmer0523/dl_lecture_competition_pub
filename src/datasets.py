@@ -88,7 +88,7 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         X = torch.from_numpy(np.load(X_path))
 
         X = torchaudio.functional.resample(
-            X, orig_freq=200, new_freq=100, lowpass_filter_width=256
+            X, orig_freq=200, new_freq=100, lowpass_filter_width=12
         )
 
         X = X - torch.mean(X, dim=1, dtype=torch.float32, keepdim=True)
