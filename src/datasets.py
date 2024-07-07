@@ -90,10 +90,8 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         X = torchaudio.functional.resample(
             X, orig_freq=200, new_freq=100, lowpass_filter_width=256
         )
-        ic(X.shape)
-        ic(X.mean(axis=1).shape)
 
-        X = X - X.mean(axis=1)
+        X = X - torch.mean(X, dim=1, dtype=torch.float32, keepdim=True)
         # X = torchaudio.transforms.Spectrogram(n_fft=12)(X)
         # X = X[1:3, :]
         # X = torch.flatten(X)
