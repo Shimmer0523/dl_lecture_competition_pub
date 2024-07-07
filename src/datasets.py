@@ -86,6 +86,7 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
             self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy"
         )
         X = torch.from_numpy(np.load(X_path))
+        
         # X = torchaudio.transforms.Spectrogram(n_fft=12)(X)
         # X = X[1:3, :]
         # X = torch.flatten(X)
