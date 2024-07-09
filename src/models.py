@@ -44,40 +44,33 @@ class ImageEncoder(nn.Module):
         return x
 
 
-class MEGLSTM(nn.Module):
-    def __init__(self):
+class LSTM_Classifier(nn.Module):
+    def __init__(self, num_classes: int, state_dict: dict = None):
         super().__init__()
         self.lstm = nn.LSTM(
-            input_size=658,
+            input_size=271,
             hidden_size=2048,
             num_layers=2,
             batch_first=True,
             dropout=0.25,
         )
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
-        y, _ = self.lstm(X)
-        return y
-
-
-class MEGClassifier(nn.Module):
-    def __init__(self, num_classes: int, state_dict: dict = None):
-        super().__init__()
-        self.encoder = MEGLSTM()
-        self.encoder.load_state_dict(state_dict)
+        if state_dict is not None:
+            self.lstm.load_state_dict(state_dict)
 
         self.classifier = nn.Sequential(
-            nn.Linear(2048, 4096),
+            nn.Linear(2048, 2048),
             nn.ReLU(),
             nn.Dropout(0.1),
-            nn.Linear(4096, 2048),
+            nn.Linear(2048, 2048),
             nn.ReLU(),
             nn.Dropout(0.1),
             nn.Linear(2048, num_classes),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.encoder(x)
+        x, _ = self.lstm(x)
+        ic(x.shape)
         x = F.softmax(self.classifier(x))
         return x
 
@@ -90,7 +83,6 @@ class BasicConvClassifier(nn.Module):
 
         self.blocks = nn.Sequential(
             ConvBlock(in_channels, hid_dim),
-            ConvBlock(hid_dim, hid_dim),
             ConvBlock(hid_dim, hid_dim),
         )
 
@@ -118,7 +110,7 @@ class ConvBlock(nn.Module):
         in_dim,
         out_dim,
         kernel_size: int = 3,
-        p_drop: float = 0.5,
+        p_drop: float = 0.1,
     ) -> None:
         super().__init__()
 

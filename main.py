@@ -10,7 +10,7 @@ from termcolor import cprint
 from tqdm import tqdm
 
 from src.datasets import ThingsMEGDataset
-from src.models import MEGClassifier, BasicConvClassifier
+from src.models import LSTM_Classifier, BasicConvClassifier
 from src.utils import set_seed
 
 
@@ -18,7 +18,6 @@ from src.utils import set_seed
 def run(args: DictConfig):
     set_seed(args.seed)
     logdir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
-    print(logdir)
 
     if args.use_wandb:
         wandb.init(mode="online", dir=logdir, project="MEG-classification")
@@ -43,13 +42,13 @@ def run(args: DictConfig):
     # ------------------
     #       Model
     # ------------------
-    model = BasicConvClassifier(
-        train_set.num_classes, train_set.seq_len, train_set.num_channels, hid_dim=512
-    ).to(args.device)
-    # model = MEGClassifier(
-    #     num_classes=train_set.num_classes,
-    #     state_dict=torch.load(args.pretrained_model),
+    # model = BasicConvClassifier(
+    #     train_set.num_classes, train_set.seq_len, train_set.num_channels, hid_dim=512
     # ).to(args.device)
+    model = LSTM_Classifier(
+        num_classes=train_set.num_classes,
+        state_dict=torch.load(args.pretrained_model),
+    ).to(args.device)
 
     # ------------------
     #     Optimizer
