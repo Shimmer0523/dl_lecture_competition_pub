@@ -20,9 +20,7 @@ class MEGClip(nn.Module):
         logit = (img_embedding @ MEG_embedding.T) / self.temperature
         img_similarity = img_embedding @ img_embedding.T
         MEG_similarity = MEG_embedding @ MEG_embedding.T
-        target = F.softmax(
-            (img_similarity + MEG_similarity) / 2 * self.temperature, dim=-1
-        )
+        target = F.softmax((img_similarity + MEG_similarity) / 2 * self.temperature, dim=-1)
         img_loss = F.cross_entropy(logit, target)
         MEG_loss = F.cross_entropy(logit.T, target.T)
         loss = (img_loss + MEG_loss) / 2
@@ -76,9 +74,7 @@ class LSTM_Classifier(nn.Module):
 
 
 class BasicConvClassifier(nn.Module):
-    def __init__(
-        self, num_classes: int, seq_len: int, in_channels: int, hid_dim: int = 128
-    ) -> None:
+    def __init__(self, num_classes: int, seq_len: int, in_channels: int, hid_dim: int = 128) -> None:
         super().__init__()
 
         self.blocks = nn.Sequential(

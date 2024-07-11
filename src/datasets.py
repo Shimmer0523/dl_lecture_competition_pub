@@ -32,14 +32,7 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         # 画像ファイルのパスをリスト化
         with open(os.path.join(data_dir, f"{split}_image_paths.txt"), "r") as file:
             lines = file.readlines()
-            lines = [
-                (
-                    line.strip()
-                    if "/" in line
-                    else f"{'_'.join(line.split('_')[:-1])}/{line}"
-                )
-                for line in lines
-            ]
+            lines = [(line.strip() if "/" in line else f"{'_'.join(line.split('_')[:-1])}/{line}") for line in lines]
         self.image_paths = [f"/content/data/Images/{line.strip()}" for line in lines]
 
         self.transform = transform
@@ -48,17 +41,13 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
         return self.num_samples
 
     def __getitem__(self, i: int) -> Tuple[torch.Tensor, Image.Image]:
-        X_path = os.path.join(
-            self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy"
-        )
+        X_path = os.path.join(self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy")
         X = torch.from_numpy(np.load(X_path))
         X = torchaudio.transforms.Spectrogram(n_fft=12)(X)
         X = X[1:3, :]
         X = torch.flatten(X)
 
-        subject_idx_path = os.path.join(
-            self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy"
-        )
+        subject_idx_path = os.path.join(self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy")
         subject_idx = torch.from_numpy(np.load(subject_idx_path))
 
         img = Image.open(self.image_paths[i]).convert("RGB")
@@ -82,29 +71,21 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         return self.num_samples
 
     def __getitem__(self, i):
-        X_path = os.path.join(
-            self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy"
-        )
+        X_path = os.path.join(self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy")
         X = torch.from_numpy(np.load(X_path))
 
-        X = torchaudio.functional.resample(
-            X, orig_freq=200, new_freq=100, lowpass_filter_width=12
-        )
+        X = torchaudio.functional.resample(X, orig_freq=200, new_freq=100, lowpass_filter_width=12)
 
         X = X - torch.mean(X, dim=1, dtype=torch.float32, keepdim=True)
         # X = torchaudio.transforms.Spectrogram(n_fft=12)(X)
         # X = X[1:3, :]
         # X = torch.flatten(X)
 
-        subject_idx_path = os.path.join(
-            self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy"
-        )
+        subject_idx_path = os.path.join(self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy")
         subject_idx = torch.from_numpy(np.load(subject_idx_path))
 
         if self.split in ["train", "val"]:
-            y_path = os.path.join(
-                self.data_dir, f"{self.split}_y", str(i).zfill(5) + ".npy"
-            )
+            y_path = os.path.join(self.data_dir, f"{self.split}_y", str(i).zfill(5) + ".npy")
             y = torch.from_numpy(np.load(y_path))
 
             return X, y, subject_idx
@@ -113,12 +94,8 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
 
     @property
     def num_channels(self) -> int:
-        return np.load(
-            os.path.join(self.data_dir, f"{self.split}_X", "00000.npy")
-        ).shape[0]
+        return np.load(os.path.join(self.data_dir, f"{self.split}_X", "00000.npy")).shape[0]
 
     @property
     def seq_len(self) -> int:
-        return np.load(
-            os.path.join(self.data_dir, f"{self.split}_X", "00000.npy")
-        ).shape[1]
+        return np.load(os.path.join(self.data_dir, f"{self.split}_X", "00000.npy")).shape[1]
