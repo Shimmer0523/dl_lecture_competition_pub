@@ -48,7 +48,7 @@ def run(args: DictConfig):
     # )
     model = LSTM_Classifier(
         input_size=train_set.num_channels,
-        hidden_size=train_set.num_classes * 2,
+        hidden_size=256,
         num_classes=train_set.num_classes,
         # state_dict=torch.load(args.pretrained_model),
     ).to(args.device)
