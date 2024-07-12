@@ -43,33 +43,27 @@ class ImageEncoder(nn.Module):
 
 
 class LSTM_Classifier(nn.Module):
-    def __init__(self, num_classes: int, state_dict: dict = None):
+    def __init__(self, input_size: int, hidden_size: int, num_classes: int, state_dict: dict = None):
         super().__init__()
-        self.lstm = nn.LSTM(
-            input_size=271,
-            hidden_size=2048,
-            num_layers=2,
-            batch_first=True,
-            dropout=0.25,
+        self.lstm = nn.Sequential(
+            Rearrange("b c t -> b t c"),
+            nn.LSTM(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                num_layers=2,
+                batch_first=True,
+                dropout=0.25,
+            ),
         )
 
         if state_dict is not None:
             self.lstm.load_state_dict(state_dict)
 
-        self.classifier = nn.Sequential(
-            nn.Linear(2048, 2048),
-            nn.ReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(2048, 2048),
-            nn.ReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(2048, num_classes),
-        )
+        self.classifier = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x, _ = self.lstm(x)
-        ic(x.shape)
-        x = F.softmax(self.classifier(x))
+        _, (x, _) = self.lstm(x)
+        x = F.softmax(self.classifier(x[-1]), dim=1)
         return x
 
 
@@ -82,11 +76,15 @@ class BasicConvClassifier(nn.Module):
             ConvBlock(hid_dim, hid_dim),
         )
 
-        self.head = nn.Sequential(
-            nn.AdaptiveAvgPool1d(1),
-            Rearrange("b d 1 -> b d"),
-            nn.Linear(hid_dim, num_classes),
-        )
+        self.adaptiveAvgPool1d = nn.AdaptiveAvgPool1d(1)
+        self.rearrenge = Rearrange("b d 1 -> b d")
+        self.fc = nn.Linear(hid_dim, num_classes)
+
+        # self.head = nn.Sequential(
+        #     nn.AdaptiveAvgPool1d(1),
+        #     Rearrange("b d 1 -> b d"),
+        #     nn.Linear(hid_dim, num_classes),
+        # )
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         """_summary_
@@ -96,8 +94,11 @@ class BasicConvClassifier(nn.Module):
             X ( b, num_classes ): _description_
         """
         X = self.blocks(X)
+        X = self.adaptiveAvgPool1d(X)
+        X = self.rearrenge(X)
+        X = self.fc(X)
 
-        return self.head(X)
+        return X
 
 
 class ConvBlock(nn.Module):
