@@ -42,12 +42,40 @@ class ImageEncoder(nn.Module):
         return x
 
 
+class Transformer_Classifier(nn.Module):
+    def __init__(self, d_model: int, num_classes: int):
+        super().__init__()
+        self.rearrange1 = Rearrange("b c t -> t b c")
+
+        self.encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model, nhead=8, dim_feedforward=2048, dropout=0.1, activation="gelu", layer_norm_eps=1e-5
+        )
+        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=6, enable_nested_tensor=False)
+
+        self.rearrange2 = Rearrange("t b c -> b c t")
+        self.adaptive_avg_pool1d = nn.AdaptiveAvgPool1d(1)
+        self.rearrange3 = Rearrange("b c t -> b (c t)")
+
+        self.classifier = nn.Sequential(
+            nn.Linear(d_model, num_classes),
+        )
+
+    def forward(self, x: torch.Tensor):
+        x = self.rearrange1(x)
+        x = self.transformer_encoder(x)
+        x = self.rearrange2(x)
+        x = self.adaptive_avg_pool1d(x)
+        x = self.rearrange3(x)
+        x = self.classifier(x)
+        return x
+
+
 class LSTM_Classifier(nn.Module):
     def __init__(self, input_size: int, hidden_size: int, num_classes: int, dropout: float, state_dict: dict = None):
         super().__init__()
 
         self.hidden_size = hidden_size
-        self.num_layers = 1
+        self.num_layers = 2
         self.rearrange1 = Rearrange("b c t -> b t c")
         self.lstm = nn.LSTM(
             input_size=input_size,
@@ -60,11 +88,16 @@ class LSTM_Classifier(nn.Module):
         if state_dict is not None:
             self.lstm.load_state_dict(state_dict)
 
-        self.classifier = nn.Linear(hidden_size, num_classes)
+        self.classifier = nn.Sequential(
+            nn.Linear(hidden_size, 2048),
+            nn.GELU(),
+            nn.Dropout(0.1),
+            nn.Linear(2048, num_classes),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+        h0 = torch.randn(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+        c0 = torch.randn(self.num_layers, x.size(0), self.hidden_size).to(x.device)
 
         x = self.rearrange1(x)
         x, (_, _) = self.lstm(x, (h0, c0))

@@ -11,7 +11,7 @@ from termcolor import cprint
 from tqdm import tqdm
 
 from src.datasets import ThingsMEGDataset
-from src.models import LSTM_Classifier, BasicConvClassifier
+from src.models import LSTM_Classifier, BasicConvClassifier, Transformer_Classifier
 from src.utils import set_seed
 
 
@@ -43,21 +43,21 @@ def run(args: DictConfig):
     # ------------------
     #       Model
     # ------------------
-    model = BasicConvClassifier(train_set.num_classes, train_set.seq_len, train_set.num_channels, hid_dim=512).to(
-        args.device
-    )
+    model = BasicConvClassifier(train_set.num_classes, train_set.seq_len, train_set.num_channels).to(args.device)
     # model = LSTM_Classifier(
     #     input_size=train_set.num_channels,
-    #     hidden_size=512,
+    #     hidden_size=2048,
     #     num_classes=train_set.num_classes,
-    #     dropout=0.1,
+    #     dropout=0.3,
     #     # state_dict=torch.load(args.pretrained_model),
     # ).to(args.device)
+    # model = Transformer_Classifier(d_model=train_set.num_channels, num_classes=train_set.num_classes).to(args.device)
 
     # ------------------
     #     Optimizer
     # ------------------
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     # ------------------
     #   Start training

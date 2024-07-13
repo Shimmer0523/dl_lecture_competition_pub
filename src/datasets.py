@@ -74,8 +74,9 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         X_path = os.path.join(self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy")
         X = torch.from_numpy(np.load(X_path))
 
-        X = torchaudio.functional.resample(X, orig_freq=200, new_freq=100, lowpass_filter_width=24)
-        X = X - torch.mean(X, dim=1, dtype=torch.float32, keepdim=True)
+        X = torchaudio.functional.resample(X, orig_freq=200, new_freq=100, lowpass_filter_width=12)
+        # X = torch.vstack([X, torch.zeros(1, X.shape[1])])
+        # X = X - torch.mean(X, dim=1, dtype=torch.float32, keepdim=True)
 
         subject_idx_path = os.path.join(self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy")
         subject_idx = torch.from_numpy(np.load(subject_idx_path))
@@ -91,6 +92,7 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
     @property
     def num_channels(self) -> int:
         return np.load(os.path.join(self.data_dir, f"{self.split}_X", "00000.npy")).shape[0]
+        # return np.load(os.path.join(self.data_dir, f"{self.split}_X", "00000.npy")).shape[0] + 1
 
     @property
     def seq_len(self) -> int:

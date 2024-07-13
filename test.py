@@ -10,6 +10,10 @@ from src.datasets import ThingsMEGDataset
 
 train_set = ThingsMEGDataset("train", "/workspaces/PythonProjects/dl_lecture_competition_pub/data")
 
+A = torch.tensor([[1, 2, 3], [3, 4, 5]])
+A = torch.vstack([A, torch.zeros(2, A.shape[1])])
+ic(A)
+
 X, y, idx = train_set[0]
 ic(X.shape)
 
