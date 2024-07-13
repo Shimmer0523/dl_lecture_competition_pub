@@ -74,7 +74,7 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         X_path = os.path.join(self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy")
         X = torch.from_numpy(np.load(X_path))
 
-        X = torchaudio.functional.resample(X, orig_freq=200, new_freq=100, lowpass_filter_width=12)
+        X = torchaudio.functional.resample(X, orig_freq=200, new_freq=100, lowpass_filter_width=24)
         X = X - torch.mean(X, dim=1, dtype=torch.float32, keepdim=True)
 
         subject_idx_path = os.path.join(self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy")

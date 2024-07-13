@@ -43,17 +43,18 @@ class ImageEncoder(nn.Module):
 
 
 class LSTM_Classifier(nn.Module):
-    def __init__(self, input_size: int, hidden_size: int, num_classes: int, state_dict: dict = None):
+    def __init__(self, input_size: int, hidden_size: int, num_classes: int, dropout: float, state_dict: dict = None):
         super().__init__()
-        self.lstm = nn.Sequential(
-            Rearrange("b c t -> b t c"),
-            nn.LSTM(
-                input_size=input_size,
-                hidden_size=hidden_size,
-                num_layers=2,
-                batch_first=True,
-                dropout=0.25,
-            ),
+
+        self.hidden_size = hidden_size
+        self.num_layers = 1
+        self.rearrange1 = Rearrange("b c t -> b t c")
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=self.hidden_size,
+            num_layers=self.num_layers,
+            batch_first=True,
+            dropout=dropout,
         )
 
         if state_dict is not None:
@@ -62,8 +63,12 @@ class LSTM_Classifier(nn.Module):
         self.classifier = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        _, (x, _) = self.lstm(x)
-        x = F.softmax(self.classifier(x[-1]), dim=1)
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+
+        x = self.rearrange1(x)
+        x, (_, _) = self.lstm(x, (h0, c0))
+        x = self.classifier(x[:, -1, :])
         return x
 
 

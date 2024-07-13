@@ -43,15 +43,16 @@ def run(args: DictConfig):
     # ------------------
     #       Model
     # ------------------
-    # model = BasicConvClassifier(train_set.num_classes, train_set.seq_len, train_set.num_channels, hid_dim=512).to(
-    #     args.device
-    # )
-    model = LSTM_Classifier(
-        input_size=train_set.num_channels,
-        hidden_size=256,
-        num_classes=train_set.num_classes,
-        # state_dict=torch.load(args.pretrained_model),
-    ).to(args.device)
+    model = BasicConvClassifier(train_set.num_classes, train_set.seq_len, train_set.num_channels, hid_dim=512).to(
+        args.device
+    )
+    # model = LSTM_Classifier(
+    #     input_size=train_set.num_channels,
+    #     hidden_size=512,
+    #     num_classes=train_set.num_classes,
+    #     dropout=0.1,
+    #     # state_dict=torch.load(args.pretrained_model),
+    # ).to(args.device)
 
     # ------------------
     #     Optimizer
