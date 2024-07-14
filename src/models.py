@@ -11,7 +11,7 @@ class MEGClip(nn.Module):
         super().__init__()
         self.temperature = 1.0
         self.img_encoder = ImageEncoder()
-        self.MEG_encoder = MEGLSTM()
+        self.MEG_encoder = BasicConvEncoder(num_classes=1854, seq_len=141, in_channels=271, hid_dim=256)
 
     def forward(self, MEG: torch.Tensor, img: torch.Tensor) -> torch.Tensor:
         img_embedding = self.img_encoder(img)
@@ -32,7 +32,7 @@ class ImageEncoder(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.encoder = torchvision.models.resnet50(pretrained=True)
+        self.encoder = torchvision.models.resnet18(pretrained=True)
         self.features = nn.Sequential(*list(self.encoder.children())[:-1])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -105,24 +105,47 @@ class LSTM_Classifier(nn.Module):
         return x
 
 
+class BasicConvEncoder(nn.Module):
+    def __init__(self, num_classes: int, seq_len: int, in_channels: int, hid_dim: int = 128) -> None:
+        super().__init__()
+
+        self.encoder = nn.Sequential(
+            ConvBlock(in_channels, hid_dim, p_drop=0.3),
+            nn.MaxPool1d(2),
+            ConvBlock(hid_dim, hid_dim * 2, p_drop=0.3),
+            nn.MaxPool1d(2),
+            ConvBlock(hid_dim * 2, hid_dim * 4, p_drop=0.3),
+            nn.MaxPool1d(2),
+            nn.AdaptiveAvgPool1d(1),
+            Rearrange("b d 1 -> b d"),
+        )
+
+    def forward(self, X: torch.Tensor) -> torch.Tensor:
+        X = self.encoder(X)
+
+        return X
+
+
 class BasicConvClassifier(nn.Module):
     def __init__(self, num_classes: int, seq_len: int, in_channels: int, hid_dim: int = 128) -> None:
         super().__init__()
 
-        self.blocks = nn.Sequential(
-            ConvBlock(in_channels, hid_dim),
-            ConvBlock(hid_dim, hid_dim),
-        )
+        self.blocks = BasicConvEncoder(num_classes, seq_len, in_channels, hid_dim)
 
-        self.adaptiveAvgPool1d = nn.AdaptiveAvgPool1d(1)
-        self.rearrenge = Rearrange("b d 1 -> b d")
-        self.fc = nn.Linear(hid_dim, num_classes)
-
-        # self.head = nn.Sequential(
+        # self.blocks = nn.Sequential(
+        #     ConvBlock(in_channels, hid_dim, p_drop=0.3),
+        #     nn.MaxPool1d(2),
+        #     ConvBlock(hid_dim, hid_dim * 2, p_drop=0.3),
+        #     nn.MaxPool1d(2),
+        #     ConvBlock(hid_dim * 2, hid_dim * 4, p_drop=0.3),
+        #     nn.MaxPool1d(2),
         #     nn.AdaptiveAvgPool1d(1),
         #     Rearrange("b d 1 -> b d"),
-        #     nn.Linear(hid_dim, num_classes),
         # )
+
+        self.head = nn.Sequential(
+            nn.Linear(hid_dim * 4, num_classes),
+        )
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         """_summary_
@@ -132,10 +155,7 @@ class BasicConvClassifier(nn.Module):
             X ( b, num_classes ): _description_
         """
         X = self.blocks(X)
-        X = self.adaptiveAvgPool1d(X)
-        X = self.rearrenge(X)
-        X = self.fc(X)
-
+        X = self.head(X)
         return X
 
 

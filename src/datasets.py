@@ -1,6 +1,7 @@
 import os
 from icecream import ic
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 import torch
 import torch.nn as nn
 import torchvision
@@ -43,9 +44,8 @@ class MEG2ImageDataset(torch.utils.data.Dataset):
     def __getitem__(self, i: int) -> Tuple[torch.Tensor, Image.Image]:
         X_path = os.path.join(self.data_dir, f"{self.split}_X", str(i).zfill(5) + ".npy")
         X = torch.from_numpy(np.load(X_path))
-        X = torchaudio.transforms.Spectrogram(n_fft=12)(X)
-        X = X[1:3, :]
-        X = torch.flatten(X)
+
+        X = torchaudio.functional.resample(X, orig_freq=200, new_freq=100, lowpass_filter_width=12)
 
         subject_idx_path = os.path.join(self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy")
         subject_idx = torch.from_numpy(np.load(subject_idx_path))
@@ -76,7 +76,6 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
 
         X = torchaudio.functional.resample(X, orig_freq=200, new_freq=100, lowpass_filter_width=12)
         # X = torch.vstack([X, torch.zeros(1, X.shape[1])])
-        # X = X - torch.mean(X, dim=1, dtype=torch.float32, keepdim=True)
 
         subject_idx_path = os.path.join(self.data_dir, f"{self.split}_subject_idxs", str(i).zfill(5) + ".npy")
         subject_idx = torch.from_numpy(np.load(subject_idx_path))

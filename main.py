@@ -43,7 +43,9 @@ def run(args: DictConfig):
     # ------------------
     #       Model
     # ------------------
-    model = BasicConvClassifier(train_set.num_classes, train_set.seq_len, train_set.num_channels).to(args.device)
+    model = BasicConvClassifier(train_set.num_classes, train_set.seq_len, train_set.num_channels, hid_dim=256).to(
+        args.device
+    )
     # model = LSTM_Classifier(
     #     input_size=train_set.num_channels,
     #     hidden_size=2048,
@@ -56,8 +58,8 @@ def run(args: DictConfig):
     # ------------------
     #     Optimizer
     # ------------------
-    # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     # ------------------
     #   Start training
@@ -75,6 +77,7 @@ def run(args: DictConfig):
             X, y = X.to(args.device), y.to(args.device)
 
             y_pred = model(X)
+            ic(y_pred.shape)
 
             loss = F.cross_entropy(y_pred, y)
             train_loss.append(loss.item())

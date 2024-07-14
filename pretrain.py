@@ -22,7 +22,7 @@ from src.utils import set_seed
 
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(args: DictConfig):
-    set_seed(123)
+    set_seed(args.seed)
 
     img_transform = transforms.Compose(
         [
@@ -33,14 +33,14 @@ def run(args: DictConfig):
     )
 
     train_dataset = MEG2ImageDataset("train", data_dir=args.data_dir, transform=img_transform)
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     model = MEGClip().to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    epochs = 1
+    epochs = args.epochs
     for epoch in range(epochs):
 
         model.train()
@@ -61,7 +61,7 @@ def run(args: DictConfig):
 
     torch.save(
         model.MEG_encoder.state_dict(),
-        "/content/drive/MyDrive/03_Colab Notebooks/DLBasics2023_colab/GraduationProject/model/pretrained_encoder.pth",
+        "/workspaces/PythonProjects/pretrained/pretrained_encoder.pth",
     )
 
 
